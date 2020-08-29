@@ -15,6 +15,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve
 from sklearn.metrics import precision_recall_curve
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.metrics import classification_report
 'exec(%matplotlib inline)'
 
 "Dataset downloading"
@@ -104,5 +106,53 @@ plt.ylabel('Precision')
 plt.legend()
 # show the plot
 plt.show()
+
+"Hyperparameter turning for logistic regression"
+max_iter=[100,200,300,400,500,600]
+solver=['newton-cg','lbfgs','liblinear','sag','saga']
+penalty=['l1','l2','elasticnet','none']
+fit_intercept=['True','False']
+C=[x for x in np.linspace(0.5,4.0,8)]
+l1_ratio=[float(x)for x in np.linspace(start=0,stop=1,num=10)]
+
+"RandomizedsearchCV"
+random_grid={'penalty':penalty,
+             'C':C,
+             'max_iter':max_iter,
+             'solver':solver,
+             'fit_intercept':fit_intercept,
+              'l1_ratio':l1_ratio}
+print(random_grid)
+
+"fitting the randomizedsearchcv"
+lr=LogisticRegression()
+lr_random=RandomizedSearchCV(estimator=lr,param_distributions=random_grid,n_iter=10,cv=5,verbose=2,random_state=100,n_jobs=1)
+lr_random.fit(x_train,y_train.ravel())
+
+"best parameter for the model"
+lr_random.best_params_
+best_random_grid=lr_random.best_estimator_
+
+"Report to Randomizedsearchcv"
+y_pred=best_random_grid.predict(x_test)
+print(confusion_matrix(y_test,y_pred))
+print("Accuracy Score{}".format((accuracy_score(y_test,y_pred))))
+print("Classification report:{}".format(classification_report(y_test,y_pred)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
